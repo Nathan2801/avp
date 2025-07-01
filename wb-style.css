@@ -1,0 +1,41 @@
+* {
+	margin: 0px;
+	padding: 0px;
+	box-sizing: border-box;
+	font-family: sans-serif;
+}
+
+html, body {
+	width: 210mm;
+	height: 297mm;
+}
+
+.print-container {
+	width: 100%;
+	height: 100%;
+	display: grid;
+	grid: repeat(5, 20%) / 50% 50%;
+	padding: 24px;
+}
+
+.white-plate-template {
+	width: 100%;
+	height: 100%;
+	text-align: center;
+	align-items: center;
+	justify-content: space-around;
+	flex-direction: column;
+	border: 1px solid black;
+	display: flex;
+}
+
+/** Desc */
+.white-place-tempalte :nth-child(1) {
+	max-width: 80%;
+}
+
+/** Price */
+.white-plate-template :nth-child(2) :nth-child(2) {
+	font-size: 48pt;
+	display: inline;
+}

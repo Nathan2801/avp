@@ -1,0 +1,68 @@
+:root {
+	--content-width: 480px;
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	border-box: box-sizing;
+	font-family: sans-serif;
+}
+
+body {
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+}
+
+h1 {
+	margin: 24px 0px 12px 0px;
+}
+
+label {
+	font-weight: bold;
+}
+
+button, input {
+	height: 1.5rem;
+}
+
+button, input[type="submit"] {
+	padding: 0 4px;
+	font-weight: bold;
+}
+
+table, th, td {
+	border: 1px solid;
+}
+
+th, td {
+	padding: 4px;
+}
+
+.h-sep {
+	height: 24px;
+}
+
+.actions {
+	display: flex;
+	width: var(--content-width);
+}
+
+.actions :nth-child(+2) {
+	margin: 0px 8px;
+}
+
+#products-table {
+	border-collapse: collapse;
+}
+
+#product-form {
+	display: flex;
+	min-width: var(--content-width);
+	flex-direction: column;
+}
+
+#product-form > * {
+	margin: 4px 0px;
+}

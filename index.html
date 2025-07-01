@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Avanzi Placas</title>
+		<meta name="author" content="Johnathan"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="description" content="Ferramenta de criação de placas"/>
+		<link href="./style.css" rel="stylesheet"/>
+		<script src="./index.js" defer></script>
+	</head>
+	<body>
+		<h1>Avanzi Placas</h1>
+		<form id="product-form">
+			<label>Descrição</label>
+			<input
+				type="text"
+				name="description"
+				placeholder="Descrição"
+				required
+			/>
+			<label>Código</label>
+			<input
+				type="number"
+				name="code"
+				placeholder="Código"
+			>
+			<label>Preço</label>
+			<input
+				type="number"
+				name="price"
+				step="0.01"
+				placeholder="Preço"
+				required
+			/>
+			<label>Tipo de quantidate</label>
+			<select name="amount-type">
+				<option value="un">un</option>
+				<option value="kg">kg</option>
+				<option value="lt">lt</option>
+			</select>
+			<label>Quantidate</label>
+			<input
+				type="number"
+				name="amount"
+				step="0.01"
+				placeholder="Quantidade"
+				required
+			/>
+			<label>Repetição</label>
+			<input
+				type="number"
+				name="repeat"
+				placeholder="Repetições"
+				required
+			/>
+			<input type="submit" value="Adicionar produto">
+		</form>
+		<div class="actions">
+			<button id="print-plates">Imprimir placas</button>
+			<button id="export-table">Exportar tabela</button>
+		</div>
+		<div class="h-sep"></div>
+		<table id="products-table">
+			<thead>
+				<tr>
+					<th scope="col">Descrição</th>
+					<th scope="col">Código</th>
+					<th scope="col">Preço</th>
+					<th scope="col">Tipo de quantidade</th>
+					<th scope="col">Quantidate</th>
+					<th scope="col">Repetições</th>
+					<th scope="col">Preço por quantidade</th>
+					<th scope="col">Ações</th>
+				</tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+	</body>
+</html>
