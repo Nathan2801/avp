@@ -1,86 +1,35 @@
-const Product = (args) => {
-	return {
-		description: args?.description || "",
-		code: Number(args?.code) || "",
-		price: Number(args?.price) || 0,
-		amountType: args?.amountType || "un",
-		amount: Number(args?.amount) || 1,
-		repeat: Number(args?.repeat) || 1,
-	};
-}
-
-Product.fromForm = (form) => {
-	return Product({
-		description: form["description"].value,
-		code: form["code"].value || "",
-		price: form["price"].value || 0.0,
-		amountType: form["amount-type"].value,
-		amount: form["amount"].value,
-		repeat: form["repeat"].value,
-	});
-}
-
-const productGrams = (product) => {
-	if (product.amountType != "kg") {
-		console.error("product is not by kg");
-		return 0;
-	}
-	return product.amount * 1000;
-}
-
-const productMillilitre = (product) => {
-	if (product.amountType != "lt") {
-		console.error("product is not by lt");
-		return 0;
-	}
-	return product.amount * 1000;
-}
-
-// TODO: should round up when third decimal is >=5.
-const productPricePerAmount = (product) => {
-	switch (product.amountType) {
-		case "un":
-			return product.price / product.amount;
-		case "kg":
-			return product.price / productGrams(product) * 1000;
-		case "lt":
-			return product.price / productMillilitre(product) * 1000;
-		default:
-			console.error("invalid enum value");
-			break;
-	}
-}
-
-const productForm = document.getElementById("product-form");
 const productsTable = document.getElementById("products-table");
 
-productForm.addEventListener("submit", (ev) => {
+document.getElementById("product-form").addEventListener("submit", (ev) => {
 	ev.preventDefault();
 
-	const product = Product.fromForm(productForm);
-	addProductToTable(productsTable, product);
+	const form = ev.target;
 
-	productForm.reset();
-	productForm["description"].focus();
+	const product = productFromForm(form);
+	addProductToTable(product);
+
+	form.reset();
+	form["description"].focus();
 });
 
-const addProductToTable = (table, product) => {
-	const row = table.tBodies[0].insertRow(-1);
+const addProductToTable = (product) => {
+	const row = productsTable.tBodies[0].insertRow(-1);
 
 	for (const value of Object.values(product)) {
-		const cell = row.insertCell(-1);
+		// FIXME: turn unit into string at table
 		const text = document.createTextNode(value);
+		const cell = row.insertCell(-1);
 		cell.appendChild(text)
 	}
 
-	const text = document.createTextNode(productPricePerAmount(product));
+	const text = document.createTextNode(productUnitPrice(product));
 	const cell = row.insertCell(-1);
 	cell.appendChild(text);
 
 	const remove = document.createElement("button");
 	remove.innerText = "X";
 	remove.addEventListener("click", (ev) => {
-		table.deleteRow(row.rowIndex);
+		productsTable.deleteRow(row.rowIndex);
 	});
 
 	const actionCell = row.insertCell(-1);
@@ -96,13 +45,12 @@ const productTableIterator = (t) => {
 					first = false;
 					continue;
 				}
-
 				// FIXME: this code sensible to product property changes
 				yield Product({
 					description: row.cells[0].firstChild.data,
 					code: row.cells[1].firstChild.data,
 					price: row.cells[2].firstChild.data,
-					amountType: row.cells[3].firstChild.data,
+					unit: Number(row.cells[3].firstChild.data),
 					amount: row.cells[4].firstChild.data,
 					repeat: row.cells[5].firstChild.data,
 				});
@@ -111,28 +59,42 @@ const productTableIterator = (t) => {
 	};
 }
 
-const printContainer = () => {
-	const div = document.createElement("div");
-	div.classList.add("print-container");
-	return div;
-}
+const templateSelect = document.getElementById("template"); 
 
-const whitePlateTemplate = (product) => {
-	const currency = "R$";
-	const amountType = product.amountType.toUpperCase();
-	const pricePerAmount = productPricePerAmount(product).toFixed(2);
-	const template = `<div class="white-plate-template">
-		<h2><b>${product.description}</b></h2>
+const defaultTemplate = Template({
+	name: "Placa branca",
+	code: `<div class="plate">
+		<h2 class="description">
+			<b>%desc%</b>
+		</h2>
 		<span>
-			<b>${currency}</b>
-			<h1>${product.price.toFixed(2)}</h1>
-			<b>${amountType}</b>
+			<b class="currency">%currency%</b>
+			<h1 class="price">%price%</h1>
+			<b class="amount-type">%unit%</b>
 		</span>
-		<h5><b>NESSA EMBALAGEM A ${amountType} SAI ${pricePerAmount}</b></h5>
-	</div>`;
+		<h5 class="price-per-amount"><b>NESSA EMBALAGEM A/O %unit% SAI %unitPrice%</b></h5>
+	</div>`,
+	style: "",
+})
 
+const templatesInterface = createTemplatesInterface({
+	select: templateSelect,
+});
+
+const createPlateElement = (product) => {
+	const element = templatesInterface[templateSelect.value]?.({
+		desc: product.description,
+		currency: "R$",
+		price: product.price.toFixed(2),
+		unit: UnitToString(product.unit).toUpperCase(),
+		unitPrice: productUnitPrice(product).toFixed(2),
+	});
+	if (element === null) {
+		console.log("invalid template value");
+		return;
+	}
 	const parent = document.createElement("div");
-	parent.innerHTML = template;
+	parent.innerHTML = element;
 	return parent.firstChild;
 }
 
@@ -152,9 +114,15 @@ const createPrintWindow = () => {
 	return w;
 }
 
-const printPlates = document.getElementById("print-plates");
+const printContainer = () => {
+	const div = document.createElement("div");
+	div.classList.add("print-container");
+	return div;
+}
 
-printPlates.addEventListener("click", (ev) => {
+const printPlatesButton = document.getElementById("print-plates");
+
+printPlatesButton.addEventListener("click", (ev) => {
 	let currContainer = null;
 
 	const products = [];
@@ -178,8 +146,8 @@ printPlates.addEventListener("click", (ev) => {
 			printWindow.document.body.appendChild(currContainer);
 		}
 
-		const template = whitePlateTemplate(product);
-		currContainer.appendChild(template);
+		const plate = createPlateElement(product);
+		currContainer.appendChild(plate);
 
 		i++;
 	}
@@ -188,8 +156,25 @@ printPlates.addEventListener("click", (ev) => {
 	printWindow.close();
 });
 
-const exportTable = document.getElementById("export-table");
+const exportTableButton = document.getElementById("export-table");
 
-exportTable.addEventListener("click", () => {
-	window.alert("Não implementado ainda");
+exportTableButton.addEventListener("click", () => {
+	window.alert("Não implementado");
 });
+
+const newTemplateButton = document.getElementById("new-template");
+
+newTemplateButton.addEventListener("click", () => {
+	window.location.href = "./new-template";
+});
+
+for (let i = 0; i < 20; i++) {
+	addProductToTable(Product({
+		description: "A random product",
+		code: "1234567890",
+		price: 0,
+		unit: Unit.KG,
+		amount: 0.300,
+		repeat: 1,
+	}));
+}

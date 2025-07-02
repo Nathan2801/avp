@@ -27,7 +27,7 @@ button, input {
 	height: 1.5rem;
 }
 
-button, input[type="submit"] {
+button, input[type="submit"], select {
 	padding: 0 4px;
 	font-weight: bold;
 }
@@ -46,11 +46,8 @@ th, td {
 
 .actions {
 	display: flex;
+	justify-content: space-between;
 	width: var(--content-width);
-}
-
-.actions :nth-child(+2) {
-	margin: 0px 8px;
 }
 
 #products-table {
@@ -65,4 +62,8 @@ th, td {
 
 #product-form > * {
 	margin: 4px 0px;
+}
+
+#plate-template {
+	background: blue;
 }
