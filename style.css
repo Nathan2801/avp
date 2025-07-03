@@ -5,7 +5,7 @@
 * {
 	margin: 0;
 	padding: 0;
-	border-box: box-sizing;
+	box-sizing: border-box;
 	font-family: sans-serif;
 }
 
@@ -45,8 +45,9 @@ th, td {
 }
 
 .actions {
-	display: flex;
-	justify-content: space-between;
+	display: grid;
+    grid-gap: 4px;
+    grid-template-columns: 1fr 1fr;
 	width: var(--content-width);
 }
 

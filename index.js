@@ -1,23 +1,77 @@
 const productsTable = document.getElementById("products-table");
 
-document.getElementById("product-form").addEventListener("submit", (ev) => {
+const productForm = document.getElementById("product-form");
+
+productForm.addEventListener("submit", (ev) => {
 	ev.preventDefault();
 
 	const form = ev.target;
 
-	const product = productFromForm(form);
+	const desc = form["description"];
+	if (!validField(desc, validateRequired)) return;
+
+	const code = form["code"];
+	if (!validField(code, validateEANOptional)) return;
+
+	const price = form["price"];
+	price.value = price.value.replace(",", ".");
+
+	const priceSplit = price.value.split(".");
+	if (
+		!priceSplit[0] || priceSplit[0].length   < 1 ||
+		!priceSplit[1] || priceSplit[1].length !== 2
+	) {
+		price.setCustomValidity("Preço inválido! ex: 1,50");
+		price.reportValidity();
+		return;
+	}
+
+	const amount = form["amount"];
+	amount.value = amount.value.replace(",", ".");
+
+	if (!Number(amount.value)) {
+		amount.setCustomValidity("Quantidate inválida!");
+		amount.reportValidity();
+		return;
+	}
+
+	const repeat = form["repeat"];
+	if (!Number(repeat.value)) {
+		repeat.setCustomValidity("Repetição inválida!");
+		repeat.reportValidity();
+		return;
+	}
+
+	const packed = form["packed"];
+	console.log(packed.checked);
+
+	const product = Product({
+		description: desc.value,
+		code: 		 code.value,
+		price: 		 Number(price.value),
+		unit: 		 UnitFromString(form["unit"].value),
+		amount: 	 Number(amount.value),
+		repeat: 	 Number(repeat.value),
+		packed: 	 packed.checked,
+	});
+
 	addProductToTable(product);
 
 	form.reset();
-	form["description"].focus();
+	desc.focus();
 });
 
 const addProductToTable = (product) => {
 	const row = productsTable.tBodies[0].insertRow(-1);
 
-	for (const value of Object.values(product)) {
-		// FIXME: turn unit into string at table
-		const text = document.createTextNode(value);
+	for (const [key, value] of Object.entries(product)) {
+		let v = value;
+		if (key === "price") {
+			v = value.toFixed(2);
+		} else if (key === "amount") {
+			v = value.toFixed(3);
+		}
+		const text = document.createTextNode(v);
 		const cell = row.insertCell(-1);
 		cell.appendChild(text)
 	}
@@ -45,14 +99,14 @@ const productTableIterator = (t) => {
 					first = false;
 					continue;
 				}
-				// FIXME: this code sensible to product property changes
 				yield Product({
 					description: row.cells[0].firstChild.data,
-					code: row.cells[1].firstChild.data,
-					price: row.cells[2].firstChild.data,
-					unit: Number(row.cells[3].firstChild.data),
-					amount: row.cells[4].firstChild.data,
-					repeat: row.cells[5].firstChild.data,
+					code: 		 row.cells[1].firstChild.data,
+					price: 		 Number(row.cells[2].firstChild.data),
+					unit: 	 	 UnitFromString(row.cells[3].firstChild.data),
+					amount: 	 Number(row.cells[4].firstChild.data),
+					repeat: 	 Number(row.cells[5].firstChild.data),
+					packed:      row.cells[6].firstChild.data === "true",
 				});
 			}
 		}
@@ -61,33 +115,19 @@ const productTableIterator = (t) => {
 
 const templateSelect = document.getElementById("template"); 
 
-const defaultTemplate = Template({
-	name: "Placa branca",
-	code: `<div class="plate">
-		<h2 class="description">
-			<b>%desc%</b>
-		</h2>
-		<span>
-			<b class="currency">%currency%</b>
-			<h1 class="price">%price%</h1>
-			<b class="amount-type">%unit%</b>
-		</span>
-		<h5 class="price-per-amount"><b>NESSA EMBALAGEM A/O %unit% SAI %unitPrice%</b></h5>
-	</div>`,
-	style: "",
-})
-
 const templatesInterface = createTemplatesInterface({
 	select: templateSelect,
 });
 
 const createPlateElement = (product) => {
 	const element = templatesInterface[templateSelect.value]?.({
-		desc: product.description,
-		currency: "R$",
-		price: product.price.toFixed(2),
-		unit: UnitToString(product.unit).toUpperCase(),
+		desc:      product.description,
+		currency:  "R$",
+		price:     product.price.toFixed(2),
+		unit:      product.unit.toString(),
 		unitPrice: productUnitPrice(product).toFixed(2),
+		code: 	   product.code,
+		unitDesc:  productUnitPriceDescription(product),
 	});
 	if (element === null) {
 		console.log("invalid template value");
@@ -151,30 +191,59 @@ printPlatesButton.addEventListener("click", (ev) => {
 
 		i++;
 	}
-
-	printWindow.print();
-	printWindow.close();
 });
 
 const exportTableButton = document.getElementById("export-table");
 
-exportTableButton.addEventListener("click", () => {
+exportTableButton.addEventListener("click", (ev) => {
 	window.alert("Não implementado");
 });
 
 const newTemplateButton = document.getElementById("new-template");
 
-newTemplateButton.addEventListener("click", () => {
+newTemplateButton.addEventListener("click", (ev) => {
 	window.location.href = "./new-template";
 });
 
-for (let i = 0; i < 20; i++) {
-	addProductToTable(Product({
-		description: "A random product",
-		code: "1234567890",
-		price: 0,
-		unit: Unit.KG,
-		amount: 0.300,
-		repeat: 1,
-	}));
+const lineLoader = document.getElementById("line-loader");
+const loadLineButton = document.getElementById("load-line");
+
+loadLineButton.addEventListener("click", (ev) => {
+	const line = lineLoader.value;
+	const values = line.split("-").map((x) => x.trim());
+
+	if (values.length !== 3) {
+		console.error("invalid line");
+		return;
+	}
+
+	const [code, desc, price] = values;
+	productForm["description"].value = desc;
+	productForm["code"].value = code;
+	productForm["price"].value = price;
+});
+
+const urlParams = new URLSearchParams(window.location.search);
+
+if (urlParams.get("debug") === "true") {
+	for (let i = 0; i < 12; i++) {
+		let amount = 1;
+
+		const unit = [UN, KG, LT][Math.floor(Math.random() * 3)];
+		if (unit.iota === UN.iota) {
+			amount = Math.ceil(Math.random() * 5);
+		} else {
+			amount = Math.random() * 2;
+		}
+
+		addProductToTable(Product({
+			description: "A random 200g KAEL product",
+			code: "1231231231231",
+			price: Math.random() * 100,
+			unit: [UN, KG, LT][Math.floor(Math.random() * 3)],
+			amount: amount,
+			repeat: 1,
+			packed: Math.round(Math.random()) === 1,
+		}));
+	}
 }

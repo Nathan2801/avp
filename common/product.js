@@ -1,46 +1,50 @@
-const Unit = {
-	UN: 0,
-	KG: 1,
-	LT: 2,
+const Unit = (repr) => {
+    return {
+        iota: Unit.iota++,
+        toString() {
+            return repr;
+        }
+    };
 }
 
-const UnitToString = (u) => {
-	switch (u) {
-		case Unit.UN: return "UN";
-		case Unit.KG: return "KG";
-		case Unit.LT: return "LT";
-		default: return null;
-	}
-}
+Unit.iota = 0;
+
+const UN = Unit("UN");
+const KG = Unit("KG");
+const LT = Unit("LT");
 
 const UnitFromString = (x) => {
-	return Unit[x.toUpperCase()];
+    switch (x) {
+        case "UN":
+        case "un":
+            return UN;
+        case "KG":
+        case "kg":
+            return KG;
+        case "LT":
+        case "lt":
+            return LT;
+    }
 }
 
 const Product = (args) => {
 	return {
-		description: args?.description || "",
-		code: Number(args?.code) ?? "",
-		price: Number(args?.price) ?? 0,
-		unit: args?.unit ?? Unit.UN,
-		amount: Number(args?.amount) ?? 1,
-		repeat: Number(args?.repeat) ?? 1,
+		description: args?.description ?? "",
+		code:        args?.code        ?? "",
+		price:       args?.price       ?? 0,
+		unit:        args?.unit        ?? UN,
+		amount:      args?.amount      ?? 1,
+		repeat:      args?.repeat      ?? 1,
+        packed:      args?.packed      ?? true,
 	};
 }
 
-const productFromForm = (form) => {
-	return Product({
-		description: form["description"].value,
-		code: form["code"].value,
-		price: form["price"].value,
-		unit: UnitFromString(form["unit"].value),
-		amount: form["amount"].value,
-		repeat: form["repeat"].value,
-	});
+const normalizePrice = (price) => {
+    return price.replace(",", ".");
 }
 
 const productGrams = (product) => {
-	if (product.unit != Unit.KG) {
+	if (product.unit.iota != KG.iota) {
 		console.error("product unit is not KG");
 		return 0;
 	}
@@ -48,24 +52,56 @@ const productGrams = (product) => {
 }
 
 const productMillilitre = (product) => {
-	if (product.unit != Unit.LT) {
+	if (product.unit.iota !== LT.iota) {
 		console.error("product unit is not LT");
 		return 0;
 	}
 	return product.amount * 1000;
 }
 
-// TODO: should round up when third decimal is >=5.
 const productUnitPrice = (product) => {
-	switch (product.unit) {
-		case Unit.UN:
-			return product.price / product.amount;
-		case Unit.KG:
-			return product.price / productGrams(product) * 1000;
-		case Unit.LT:
-			return product.price / productMillilitre(product) * 1000;
+    let unitPrice = 0;
+	switch (product.unit.iota) {
+		case UN.iota:
+			unitPrice = product.price / product.amount;
+            break;
+		case KG.iota:
+			unitPrice = product.price / productGrams(product) * 1000;
+            break;
+		case LT.iota:
+			unitPrice = product.price / productMillilitre(product) * 1000;
+            break;
 		default:
 			console.error(`invalid unit value: ${product.unit}`);
-			break;
+			return;
 	}
+
+    const priceMult = unitPrice * 100;
+    const thirdDecimal = Math.floor((priceMult - Math.floor(priceMult)) * 10);
+    if (thirdDecimal >= 5) {
+        unitPrice = Math.ceil(priceMult) / 100;
+    } else {
+        unitPrice = Math.floor(priceMult) / 100;
+    }
+
+    return unitPrice;
+}
+
+const productUnitPriceDescription = (product) => {
+    let desc = "";
+    console.log(product);
+    if (product.packed) {
+        desc = "NESSA EMBALAGEM ";
+    }
+    switch (product.unit.iota) {
+        case UN.iota:
+            return `${desc}A UN SAI`;
+        case KG.iota:
+            return `${desc}O KG SAI`;
+        case LT.iota:
+            return `${desc}O LT SAI`;
+        default:
+            console.error(`invalid unit value: ${product.unit}`);
+            return;
+    }
 }

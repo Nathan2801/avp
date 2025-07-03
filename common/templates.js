@@ -36,6 +36,38 @@ const getTemplate = (name) => {
 	return null;
 }
 
+const defaultTemplate = Template({
+	name: "Placa branca",
+	code: `<div
+		style="
+		width: 100%;
+		height: 100%;
+		display: flex;
+		text-align: center;
+		align-items: center;
+		justify-content: space-around;
+		flex-direction: column;
+		border: 1px solid black;
+		display;
+		"
+		>
+		<h2 style="max-width: 80%">
+			<b>%desc%</b>
+		</h2>
+		<div>
+			<b>%currency%</b>
+			<h1 style="font-size: 64pt; display: inline">%price%</h1>
+			<b>%unit%</b>
+		</div>
+		<div>
+			<b>%unitDesc% R$%unitPrice%</b>
+			<br>
+			<b>cod. %code%</b>
+		</div>
+	</div>`,
+	style: "",
+})
+
 const createTemplatesInterface = ({ select }) => {
 	const interface = {};
 	const templates = loadCustomTemplates();
