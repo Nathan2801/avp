@@ -115,12 +115,20 @@ const productTableIterator = (t) => {
 
 const templateSelect = document.getElementById("template"); 
 
-const templatesInterface = createTemplatesInterface({
-	select: templateSelect,
-});
+const createTemplateOption = (template) => {
+	const option = document.createElement("option");
+
+	option.value = template.name;
+	option.innerText = template.name;
+
+	templateSelect.appendChild(option);
+}
+
+createTemplateOption(defaultTemplate);
+createTemplateOption( yellowTemplate);
 
 const createPlateElement = (product) => {
-	const element = templatesInterface[templateSelect.value]?.({
+	const element = useTemplate(templateSelect.value, {
 		desc:      product.description,
 		currency:  "R$",
 		price:     product.price.toFixed(2),
@@ -143,27 +151,38 @@ const createPrintWindow = () => {
 	w.document.open();
 	w.document.write(`
 	<html>
-		<head>
-			<link href="./wb-style.css" rel="stylesheet">
-		</head>
-		<body>
-		</body>
+		<head></head>
+		<style>
+			* {
+				margin: 0px;
+				padding: 0px;
+				box-sizing: border-box;
+				font-family: sans-serif;
+			}
+		</style>
+		<body></body>
 	</html>
 	`);
 	w.document.close();
 	return w;
 }
 
-const printContainer = () => {
+const createPage = () => {
 	const div = document.createElement("div");
-	div.classList.add("print-container");
+	div.style.width = "210mm";
+	div.style.height = "297mm";
+	div.style.display = "flex";
+	div.style.flexWrap = "wrap";
+	div.style.border = "1px dashed red";
+	div.style.alignContent = "start";
+	div.style.padding = "1mm";
 	return div;
 }
 
 const printPlatesButton = document.getElementById("print-plates");
 
 printPlatesButton.addEventListener("click", (ev) => {
-	let currContainer = null;
+	let currPage = null;
 
 	const products = [];
 	for (const product of productTableIterator(productsTable)) {
@@ -181,16 +200,18 @@ printPlatesButton.addEventListener("click", (ev) => {
 
 	let i = 0;
 	for (const product of products) {
-		if (i == 0 || i % 10 === 0) {
-			currContainer = printContainer();
-			printWindow.document.body.appendChild(currContainer);
+		if (i == 0 || i % allTemplates[templateSelect.value].platePerPage === 0) {
+			currPage = createPage();
+			printWindow.document.body.appendChild(currPage);
 		}
 
 		const plate = createPlateElement(product);
-		currContainer.appendChild(plate);
+		currPage.appendChild(plate);
 
 		i++;
 	}
+
+	printWindow.print();
 });
 
 const exportTableButton = document.getElementById("export-table");
@@ -226,7 +247,8 @@ loadLineButton.addEventListener("click", (ev) => {
 const urlParams = new URLSearchParams(window.location.search);
 
 if (urlParams.get("debug") === "true") {
-	for (let i = 0; i < 12; i++) {
+	let n = Number(urlParams.get("amount")) || 12;
+	for (let i = 0; i < n; i++) {
 		let amount = 1;
 
 		const unit = [UN, KG, LT][Math.floor(Math.random() * 3)];
