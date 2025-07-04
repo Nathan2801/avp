@@ -242,6 +242,39 @@ loadLineButton.addEventListener("click", (ev) => {
 	productForm["description"].value = desc;
 	productForm["code"].value = code;
 	productForm["price"].value = price;
+	productForm["repeat"].value = "1";
+
+	for (const word of desc.split(" ")) {
+		const [n, rest1] = Parser.parseNumber(word);
+		if (n === null) {
+			continue;
+		}
+
+		const [u, rest2] = Parser.parseWord(rest1);
+
+		const unit = UnitFromString(u);
+		if (unit === null) {
+			console.error("couldn't find unit");
+			break;
+		}
+
+		productForm["unit"].value = unit.toString().toLowerCase();
+
+		let amount = 0;
+		switch (u) {
+			case "UN": case "un":
+			case "KG": case "kg":
+			case "LT": case "lt":
+				amount = n;
+				break;
+			case "G": case "g":
+			case "ML": case "ml":
+				amount = n / 1000;
+				break;
+		}
+
+		productForm["amount"].value = amount;
+	}
 });
 
 const urlParams = new URLSearchParams(window.location.search);

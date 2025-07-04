@@ -20,10 +20,16 @@ const UnitFromString = (x) => {
             return UN;
         case "KG":
         case "kg":
+		case  "G":
+		case  "g":
             return KG;
         case "LT":
         case "lt":
+        case "ML":
+        case "ml":
             return LT;
+		default:
+			return null;
     }
 }
 
