@@ -13,23 +13,28 @@ const defaultTemplate = Template({
 		display: flex;
 		text-align: center;
 		align-items: center;
-		justify-content: space-around;
 		flex-direction: column;
+		justify-content: space-around;
 		border: 1px solid black;
-		"
-		>
-		<h2 style="max-width: 80%">
-			<b>%desc%</b>
-		</h2>
-		<div>
-			<b>%currency%</b>
-			<h1 style="font-size: 64pt; display: inline">%price%</h1>
-			<b>%unit%</b>
+		font-weight: bolder;
+		padding: 1mm;
+		">
+		<div style="max-width: 95%; height: 4rem;">
+			<span style="
+				overflow: hidden;
+				text-overflow: ellipsis;
+				font-size: 16pt;
+			">%desc%</span>
 		</div>
-		<div>
-			<b>%unitDesc% R$%unitPrice%</b>
+		<div style="flex: 1;">
+			<span style="font-size: 14pt;">%currency%</span>
+			<span style="font-size: 5em;">%price%</span>
+			<span style="font-size: 14pt;">%unit%</span>
+		</div>
+		<div style="">
+			<span style="font-size: 14pt;">%unitDesc% R$%unitPrice%</span>
 			<br>
-			<b>cod. %code%</b>
+			<span style="font-size: 14pt;">cod. %code%</span>
 		</div>
 	</div>`,
 })
@@ -43,26 +48,34 @@ const yellowTemplate = Template({
 		display: flex;
 		text-align: center;
 		align-items: center;
-		justify-content: space-around;
 		flex-direction: column;
+		justify-content: space-around;
 		border: 1px solid black;
+		font-weight: bolder;
 		background: yellow;
-		display;
-		"
-		>
-		<h1 style="text-decoration: underline">OFERTA</h1>
-		<h2 style="max-width: 80%">
-			<b>%desc%</b>
-		</h2>
-		<div>
-			<b>%currency%</b>
-			<h1 style="font-size: 64pt; display: inline">%price%</h1>
-			<b>%unit%</b>
+		padding: 1mm;
+		">
+		<span style="
+		 	font-size: 24pt;
+			text-decoration: underline;
+			margin-bottom: 0.5em;
+		">OFERTA</span>
+		<div style="max-width: 95%; height: 4rem;">
+			<span style="
+				overflow: hidden;
+				text-overflow: ellipsis;
+				font-size: 16pt;
+			">%desc%</span>
 		</div>
-		<div>
-			<b>%unitDesc% R$%unitPrice%</b>
+		<div style="flex: 1;">
+			<span style="font-size: 14pt;">%currency%</span>
+			<span style="font-size: 5em;">%price%</span>
+			<span style="font-size: 14pt;">%unit%</span>
+		</div>
+		<div style="">
+			<span style="font-size: 14pt;">%unitDesc% R$%unitPrice%</span>
 			<br>
-			<b>cod. %code%</b>
+			<span style="font-size: 14pt;">cod. %code%</span>
 		</div>
 	</div>`,
 	platePerPage: 8,

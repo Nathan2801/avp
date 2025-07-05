@@ -7,6 +7,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 		<meta name="description" content="Ferramenta de criação de placas"/>
 		<link href="./style.css" rel="stylesheet"/>
+		<link href=" https://cdn.jsdelivr.net/npm/segoe-fonts@1.0.1/segoe-fonts.min.css " rel="stylesheet">
 		<script src="./common/product.js" defer></script>
 		<script src="./common/templates.js" defer></script>
 		<script src="./common/validations.js" defer></script>
@@ -55,16 +56,19 @@
                     type="checkbox"
                     name="packed"
                 >
-            </label>
+			</label>
 			<input type="submit" value="Adicionar produto">
 		</form>
 		<div class="actions">
 			<button id="print-plates">Imprimir placas</button>
 			<button id="export-table">Exportar tabela</button>
 			<select id="template"></select>
-			<button id="new-template">Criar template</button>
-            <input id="line-loader" type="text" placeholder="Linha...">
-            <button id="load-line">Carregar linha</button>
+			<textarea
+				id="text-area-for-load"
+				placeholder="Linhas..."
+				rows="3"
+			></textarea>
+            <button id="load-lines">Carregar linhas</button>
 		</div>
 		<div class="h-sep"></div>
 		<table id="products-table">
@@ -77,7 +81,7 @@
 					<th scope="col">Quantidate</th>
 					<th scope="col">Repetições</th>
 					<th scope="col">Embalado</th>
-					<th scope="col">Preço por quantidade</th>
+					<th scope="col">Preço por UN de medida</th>
 					<th scope="col">Ações</th>
 				</tr>
 			</thead>

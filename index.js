@@ -1,4 +1,32 @@
-const productsTable = document.getElementById("products-table");
+const ID = (id) => document.getElementById(id);
+
+ID("print-plates").addEventListener("click", (ev) => printPlates());
+ID("export-table").addEventListener("click", (ev) => window.alert("Não implementado"));
+
+ID("load-lines").addEventListener(
+	"click",
+	(ev) => loadFormFromTextArea(
+		ID("product-form"),
+		ID("text-area-for-load")
+	)
+);
+
+document.addEventListener("keydown", (ev) => {
+	switch (ev.key) {
+		case "F1":
+			printPlates();
+			break;
+		case "F2":
+			productForm.requestSubmit();
+			break;
+		case "F4":
+			loadFormFromTextArea(
+				ID("product-form"),
+				ID("text-area-for-load")
+			);
+			break;
+	}
+});
 
 const productForm = document.getElementById("product-form");
 
@@ -11,7 +39,7 @@ productForm.addEventListener("submit", (ev) => {
 	if (!validField(desc, validateRequired)) return;
 
 	const code = form["code"];
-	if (!validField(code, validateEANOptional)) return;
+	if (!validField(code, validateAllNumbers)) return;
 
 	const price = form["price"];
 	price.value = price.value.replace(",", ".");
@@ -55,14 +83,14 @@ productForm.addEventListener("submit", (ev) => {
 		packed: 	 packed.checked,
 	});
 
-	addProductToTable(product);
+	addProductToTable(ID("products-table"), product);
 
 	form.reset();
 	desc.focus();
 });
 
-const addProductToTable = (product) => {
-	const row = productsTable.tBodies[0].insertRow(-1);
+const addProductToTable = (table, product) => {
+	const row = table.tBodies[0].insertRow(-1);
 
 	for (const [key, value] of Object.entries(product)) {
 		let v = value;
@@ -83,7 +111,7 @@ const addProductToTable = (product) => {
 	const remove = document.createElement("button");
 	remove.innerText = "X";
 	remove.addEventListener("click", (ev) => {
-		productsTable.deleteRow(row.rowIndex);
+		table.deleteRow(row.rowIndex);
 	});
 
 	const actionCell = row.insertCell(-1);
@@ -131,16 +159,18 @@ const createPlateElement = (product) => {
 	const element = useTemplate(templateSelect.value, {
 		desc:      product.description,
 		currency:  "R$",
-		price:     product.price.toFixed(2),
-		unit:      product.unit.toString(),
-		unitPrice: productUnitPrice(product).toFixed(2),
+		price:     product.price.toFixed(2).replace(".", ","),
+		unit:      product.packed ? UN.toString() : product.unit.toString(),
+		unitPrice: productUnitPrice(product).toFixed(2).replace(".", ","),
 		code: 	   product.code,
 		unitDesc:  productUnitPriceDescription(product),
 	});
+
 	if (element === null) {
 		console.log("invalid template value");
 		return;
 	}
+
 	const parent = document.createElement("div");
 	parent.innerHTML = element;
 	return parent.firstChild;
@@ -151,13 +181,14 @@ const createPrintWindow = () => {
 	w.document.open();
 	w.document.write(`
 	<html>
-		<head></head>
+		<head>
+		</head>
 		<style>
 			* {
 				margin: 0px;
 				padding: 0px;
 				box-sizing: border-box;
-				font-family: sans-serif;
+				font-family: "Trebuchet MS", sans-serif;
 			}
 		</style>
 		<body></body>
@@ -179,13 +210,11 @@ const createPage = () => {
 	return div;
 }
 
-const printPlatesButton = document.getElementById("print-plates");
-
-printPlatesButton.addEventListener("click", (ev) => {
+const printPlates = () => {
 	let currPage = null;
 
 	const products = [];
-	for (const product of productTableIterator(productsTable)) {
+	for (const product of productTableIterator(ID("products-table"))) {
 		for (let i = 0; i < product.repeat; i++) {
 			products.push(product);
 		}
@@ -210,40 +239,38 @@ printPlatesButton.addEventListener("click", (ev) => {
 
 		i++;
 	}
+}
 
-	printWindow.print();
-});
+const loadFormFromTextArea = (form, textArea) => {
+	const lines = textArea.value.split("\n");
+	for (const line of lines) {
+		const err = loadFormFromLine(form, line);
+		if (err) {
+			console.error(err);
+			continue;
+		}
+		productForm.requestSubmit();
+	}
+}
 
-const exportTableButton = document.getElementById("export-table");
-
-exportTableButton.addEventListener("click", (ev) => {
-	window.alert("Não implementado");
-});
-
-const newTemplateButton = document.getElementById("new-template");
-
-newTemplateButton.addEventListener("click", (ev) => {
-	window.location.href = "./new-template";
-});
-
-const lineLoader = document.getElementById("line-loader");
-const loadLineButton = document.getElementById("load-line");
-
-loadLineButton.addEventListener("click", (ev) => {
-	const line = lineLoader.value;
+const loadFormFromLine = (form, line) => {
 	const values = line.split("-").map((x) => x.trim());
-
-	if (values.length !== 3) {
-		console.error("invalid line");
-		return;
+	if (values.length < 3) {
+		return `line should have at least three sections:\n"${line}"`;
 	}
 
-	const [code, desc, price] = values;
-	productForm["description"].value = desc;
-	productForm["code"].value = code;
-	productForm["price"].value = price;
-	productForm["repeat"].value = "1";
+	const [code, desc, price, ...rest] = values;
 
+	form["code"].value = code;
+	form["price"].value = price;
+	form["description"].value = desc;
+
+	form["repeat"].value = "1";
+	if (rest[0]?.toUpperCase().startsWith("SOMENTE LOJA")) {
+		form["repeat"].value = 2;
+	}
+
+	let unitFigured = false;
 	for (const word of desc.split(" ")) {
 		const [n, rest1] = Parser.parseNumber(word);
 		if (n === null) {
@@ -254,11 +281,11 @@ loadLineButton.addEventListener("click", (ev) => {
 
 		const unit = UnitFromString(u);
 		if (unit === null) {
-			console.error("couldn't find unit");
-			break;
+			return `unknown unit: ${unit}`;
 		}
 
-		productForm["unit"].value = unit.toString().toLowerCase();
+		unitFigured = true;
+		form["unit"].value = unit.toString().toLowerCase();
 
 		let amount = 0;
 		switch (u) {
@@ -273,9 +300,17 @@ loadLineButton.addEventListener("click", (ev) => {
 				break;
 		}
 
-		productForm["amount"].value = amount;
+		form["amount"].value = amount;
 	}
-});
+
+	form["packed"].checked = true;
+
+	if (unitFigured === false) {
+		return `unit not figured out:\n"${line}"`;
+	}
+
+	return "";
+}
 
 const urlParams = new URLSearchParams(window.location.search);
 
@@ -291,8 +326,19 @@ if (urlParams.get("debug") === "true") {
 			amount = Math.random() * 2;
 		}
 
-		addProductToTable(Product({
-			description: "A random 200g KAEL product",
+		let desc = "";
+		const descLen = Math.floor(Math.random() * 50) + 20;
+		for (let i = 0; i < descLen; i++) {
+			const space = Math.floor(Math.random() * 4);
+			if (space === 0) {
+				desc += " ";
+			} else {
+				desc += "abcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random() * 26)];
+			}
+		}
+
+		addProductToTable(ID("products-table"), Product({
+			description: desc,
 			code: "1231231231231",
 			price: Math.random() * 100,
 			unit: [UN, KG, LT][Math.floor(Math.random() * 3)],
