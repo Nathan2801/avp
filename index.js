@@ -268,45 +268,47 @@ const loadFormFromLine = (form, line) => {
 		form["repeat"].value = 2;
 	}
 
-	let unitFigured = false;
 	for (const word of desc.split(" ")) {
-		const [n, rest1] = Parser.parseNumber(word);
-		if (n === null) {
+		let parser = Parser(word);
+
+		parser = Parser.parseNumber(parser);
+		if (parser.parsed === undefined) continue;
+
+		const n = Number(parser.parsed);
+		parser = Parser.done(parser);
+
+		parser = Parser.parseWord(parser);
+		console.log(parser);
+		if (parser.parsed === undefined) {
+			console.error("unable to parse word");
 			continue;
 		}
 
-		const [u, rest2] = Parser.parseWord(rest1);
+		const uword = parser.parsed;
+		parser = Parser.done(parser);
 
-		const unit = UnitFromString(u);
-		if (unit === null) {
-			return `unknown unit: ${unit}`;
-		}
-
-		unitFigured = true;
-		form["unit"].value = unit.toString().toLowerCase();
+		const unit = UnitFromString(uword);
 
 		let amount = 0;
-		switch (u) {
-			case "UN": case "un":
-			case "KG": case "kg":
-			case "LT": case "lt":
+		switch (uword.toUpperCase()) {
+			case "UN":
+			case "KG":
+			case "LT":
 				amount = n;
 				break;
-			case "G": case "g":
-			case "ML": case "ml":
+			case "G":
+			case "ML":
 				amount = n / 1000;
 				break;
+			default:
+				return `unknown unit: ${unit}`;
 		}
 
+		form["unit"].value = unit.toString().toLowerCase();
 		form["amount"].value = amount;
 	}
 
 	form["packed"].checked = true;
-
-	if (unitFigured === false) {
-		return `unit not figured out:\n"${line}"`;
-	}
-
 	return "";
 }
 

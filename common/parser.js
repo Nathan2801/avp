@@ -1,54 +1,54 @@
-const Parser = {}
+// This code uses functional programming concepts
+// which makes it unnecessary complicated, and it
+// has no good reason to be implemented this way :)
+//
+const Parser = (text, parsed) => ({
+	text: text,
+	parsed: parsed,
+})
 
-Parser.ord = (char) => char.charCodeAt(0)
+Parser.ord = (char) => char ? char.charCodeAt(0) : -1
 
-Parser.digit = (char) => (
-	char.charCodeAt(0) - "0".charCodeAt(0)
+Parser.isDigit = (parser) => (
+	Parser.ord(parser.text[0]) >= Parser.ord("0")
+	&& Parser.ord(parser.text[0]) <= Parser.ord("9")
 )
 
-Parser.isDigit = (char) => (
-	char.charCodeAt(0) >= "0".charCodeAt(0) &&
-	char.charCodeAt(0) <= "9".charCodeAt(0)
+Parser.isNumber = (parser) => (
+	parser.text[0] == "."
+	|| Parser.isDigit(parser)
 )
 
-Parser.isAlpha = (char) => (
-	(Parser.ord(char) >= Parser.ord("a") && Parser.ord(char) <= Parser.ord("z")) ||
-	(Parser.ord(char) >= Parser.ord("A") && Parser.ord(char) <= Parser.ord("Z"))
+Parser.isAlpha = (parser) => (
+	(
+		Parser.ord(parser.text[0]) >= Parser.ord("a")
+		&& Parser.ord(parser.text[0]) <= Parser.ord("z")
+	) ||
+	(
+		Parser.ord(parser.text[0]) >= Parser.ord("A")
+		&& Parser.ord(parser.text[0]) <= Parser.ord("Z")
+	)
 )
 
-Parser.parseNumber = (string) => {
-	let r = null;
-	let s = string;
+Parser.create = (f) => (m) => (parser) => f(parser) ? m(parser) : parser
 
-	while (s.length > 0) {
-		if (!Parser.isDigit(s[0])) {
-			break;
-		}
-		if (r === null) {
-			r = 0;
-		}
-		r = r * 10 + Parser.digit(s[0]);
-		s = s.slice(1);
-	}
-	return [r, s];
-}
+Parser.consume = (parser) => Parser(
+	parser.text.slice(1),
+	parser.parsed === undefined
+		? parser.text[0]
+		: parser.parsed + parser.text[0]
+)
 
+const chain = (f) => (g) => (x) => g(f(x))
 
-Parser.parseWord = (string) => {
-	let r = null;
-	let s = string;
+Parser.parseWord = Parser.create
+	(Parser.isAlpha)
+	(chain (Parser.consume) (Parser.parseWord))
 
-	while (s.length > 0) {
-		if (!Parser.isAlpha(s[0])) {
-			break;
-		}
-		if (r === null) {
-			r = "";
-		}
-		r = r + s[0];
-		s = s.slice(1);
-	}
-	return [r, s];
-}
+Parser.parseNumber = Parser.create
+	(Parser.isNumber)
+	(chain (Parser.consume) (Parser.parseNumber))
+
+Parser.done = (parser) => Parser(parser.text)
 
 export default Parser;
