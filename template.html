@@ -1,15 +1,54 @@
 <html>
 	<head>
-		<link href="https://fonts.cdnfonts.com/css/segoe-ui-4?styles=18004" rel="stylesheet">
 	</head>
-		<style>
-			* {
-				margin: 0px;
-				padding: 0px;
-				box-sizing: border-box;
-				font-family: "Segoe UI", sans-serif;
+	<style>
+		@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+
+		* {
+			margin: 0px;
+			padding: 0px;
+			box-sizing: border-box;
+			font-family: "Noto Sans", sans-serif;
+		} 
+	</style>
+	<body>
+		<script src="common/product.js"></script>
+		<script src="common/templates.js"></script>
+		<script>
+			// FIXME: duplicate
+			const createPlateElement = (product) => {
+				const element = useTemplate("Placa branca", {
+					desc:      product.description,
+					currency:  "R$",
+					price:     product.price.toFixed(2).replace(".", ","),
+					unit:      product.packed ? UN.toString() : product.unit.toString(),
+					unitPrice: productUnitPrice(product).toFixed(2).replace(".", ","),
+					code: 	   product.code,
+					unitDesc:  productUnitPriceDescription(product),
+				});
+
+				if (element === null) {
+					console.log("invalid template value");
+					return;
+				}
+
+				const parent = document.createElement("div");
+				parent.innerHTML = element;
+				return parent.firstChild;
 			}
-		</style>
-		<body>
-		</body>
+
+			const page = createA4Page();
+			document.body.appendChild(page);
+			const plate = createPlateElement(Product({
+				description: "Suco [marca] 500ml de laraja/maracuja com pedaços de almondegas empanadas não fritas",
+				code: "1234567891011",
+				price: 8.69,
+				unit: LT,
+				amount: 1,
+				repeat: 1,
+				packed: true,
+			}));
+			page.appendChild(plate);
+		</script>
+	</body>
 </html>

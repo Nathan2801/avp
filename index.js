@@ -188,7 +188,7 @@ const createPrintWindow = () => {
 				margin: 0px;
 				padding: 0px;
 				box-sizing: border-box;
-				font-family: "Trebuchet MS", sans-serif;
+				font-family: sans-serif;
 			}
 		</style>
 		<body></body>
@@ -196,18 +196,6 @@ const createPrintWindow = () => {
 	`);
 	w.document.close();
 	return w;
-}
-
-const createPage = () => {
-	const div = document.createElement("div");
-	div.style.width = "210mm";
-	div.style.height = "297mm";
-	div.style.display = "flex";
-	div.style.flexWrap = "wrap";
-	div.style.border = "1px dashed red";
-	div.style.alignContent = "start";
-	div.style.padding = "1mm";
-	return div;
 }
 
 const printPlates = () => {
@@ -230,7 +218,7 @@ const printPlates = () => {
 	let i = 0;
 	for (const product of products) {
 		if (i == 0 || i % allTemplates[templateSelect.value].platePerPage === 0) {
-			currPage = createPage();
+			currPage = createA4Page();
 			printWindow.document.body.appendChild(currPage);
 		}
 
