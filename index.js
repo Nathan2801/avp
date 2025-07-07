@@ -1,3 +1,29 @@
+import {
+	useTemplate,
+	createA4Page,
+	allTemplates,
+	defaultTemplate,
+	yellowTemplate,
+} from "./common/templates.js";
+
+import Parser from "./common/parser.js";
+
+import {
+	Product,
+	UN, KG, LT,
+	UnitFromString,
+	productUnitPrice,
+	productUnitPriceDescription,
+} from "./common/product.js";
+
+import {
+	validField,
+	validateRequired,
+	validateNumber,
+	validateFloat,
+	validateInteger,
+} from "./common/validations.js";
+
 const ID = (id) => document.getElementById(id);
 
 ID("print-plates").addEventListener("click", (ev) => printPlates());
@@ -39,39 +65,23 @@ productForm.addEventListener("submit", (ev) => {
 	if (!validField(desc, validateRequired)) return;
 
 	const code = form["code"];
-	if (!validField(code, validateAllNumbers)) return;
+	if (!validField(code, validateInteger)) return;
 
 	const price = form["price"];
 	price.value = price.value.replace(",", ".");
-
-	const priceSplit = price.value.split(".");
-	if (
-		!priceSplit[0] || priceSplit[0].length   < 1 ||
-		!priceSplit[1] || priceSplit[1].length !== 2
-	) {
-		price.setCustomValidity("Preço inválido! ex: 1,50");
-		price.reportValidity();
-		return;
-	}
+	if (!validField(price, validateRequired)) return;
+	if (!validField(price, validateFloat)) return;
 
 	const amount = form["amount"];
 	amount.value = amount.value.replace(",", ".");
-
-	if (!Number(amount.value)) {
-		amount.setCustomValidity("Quantidate inválida!");
-		amount.reportValidity();
-		return;
-	}
+	if (!validField(amount, validateRequired)) return;
+	if (!validField(amount, validateNumber)) return;
 
 	const repeat = form["repeat"];
-	if (!Number(repeat.value)) {
-		repeat.setCustomValidity("Repetição inválida!");
-		repeat.reportValidity();
-		return;
-	}
+	if (!validField(repeat, validateRequired)) return;
+	if (!validField(repeat, validateInteger)) return;
 
 	const packed = form["packed"];
-	console.log(packed.checked);
 
 	const product = Product({
 		description: desc.value,
@@ -153,7 +163,7 @@ const createTemplateOption = (template) => {
 }
 
 createTemplateOption(defaultTemplate);
-createTemplateOption( yellowTemplate);
+createTemplateOption(yellowTemplate);
 
 const createPlateElement = (product) => {
 	const element = useTemplate(templateSelect.value, {

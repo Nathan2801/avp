@@ -4,7 +4,7 @@ const Template = (props) => ({
 	platePerPage: props?.platePerPage ?? 10,
 })
 
-const createA4Page = () => {
+export const createA4Page = () => {
 	const div = document.createElement("div");
 	div.style.width = "210mm";
 	div.style.height = "297mm";
@@ -15,7 +15,7 @@ const createA4Page = () => {
 	return div;
 }
 
-const defaultTemplate = Template({
+export const defaultTemplate = Template({
 	name: "Placa branca",
 	code: `<div
 		style="
@@ -50,7 +50,7 @@ const defaultTemplate = Template({
 	</div>`,
 })
 
-const yellowTemplate = Template({
+export const yellowTemplate = Template({
 	name: "Placa amarela",
 	code: `<div
 		style="
@@ -92,12 +92,12 @@ const yellowTemplate = Template({
 	platePerPage: 8,
 })
 
-const allTemplates = {
+export const allTemplates = {
 	[defaultTemplate.name]: defaultTemplate,
 	[ yellowTemplate.name]:  yellowTemplate,
 }
 
-const useTemplate = (name, props) => {
+export const useTemplate = (name, props) => {
 	const template = allTemplates[name];
 	if (template === null) {
 		console.error("unknown template");
@@ -109,3 +109,5 @@ const useTemplate = (name, props) => {
 	}
 	return templateString;
 }
+
+export default {};

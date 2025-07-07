@@ -9,11 +9,11 @@ const Unit = (repr) => {
 
 Unit.iota = 0;
 
-const UN = Unit("UN");
-const KG = Unit("KG");
-const LT = Unit("LT");
+export const UN = Unit("UN");
+export const KG = Unit("KG");
+export const LT = Unit("LT");
 
-const UnitFromString = (x) => {
+export const UnitFromString = (x) => {
     switch (x) {
         case "UN":
         case "un":
@@ -33,7 +33,7 @@ const UnitFromString = (x) => {
     }
 }
 
-const Product = (args) => {
+export const Product = (args) => {
 	return {
 		description: args?.description ?? "",
 		code:        args?.code        ?? "",
@@ -65,7 +65,7 @@ const productMillilitre = (product) => {
 	return product.amount * 1000;
 }
 
-const productUnitPrice = (product) => {
+export const productUnitPrice = (product) => {
     let unitPrice = 0;
 	switch (product.unit.iota) {
 		case UN.iota:
@@ -93,9 +93,8 @@ const productUnitPrice = (product) => {
     return unitPrice;
 }
 
-const productUnitPriceDescription = (product) => {
+export const productUnitPriceDescription = (product) => {
     let desc = "";
-    console.log(product);
     if (product.packed) {
         desc = "NESSA EMBALAGEM ";
     }
@@ -111,3 +110,5 @@ const productUnitPriceDescription = (product) => {
             return;
     }
 }
+
+export default {};

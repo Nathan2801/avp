@@ -50,3 +50,5 @@ Parser.parseWord = (string) => {
 	}
 	return [r, s];
 }
+
+export default Parser;
