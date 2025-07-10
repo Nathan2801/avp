@@ -35,13 +35,13 @@ export const UnitFromString = (x) => {
 
 export const Product = (args) => {
 	return {
-		description: args?.description ?? "",
-		code:        args?.code        ?? "",
-		price:       args?.price       ?? 0,
-		unit:        args?.unit        ?? UN,
-		amount:      args?.amount      ?? 1,
-		repeat:      args?.repeat      ?? 1,
-        packed:      args?.packed      ?? true,
+		desc:  	args?.desc   ?? "",
+		code:  	args?.code   ?? "",
+		price: 	args?.price  ?? 0,
+		unit:   args?.unit   ?? UN,
+		amount: args?.amount ?? 1,
+		repeat: args?.repeat ?? 1,
+        packed: args?.packed ?? true,
 	};
 }
 
@@ -84,6 +84,7 @@ export const productUnitPrice = (product) => {
 
     const priceMult = unitPrice * 100;
     const thirdDecimal = Math.floor((priceMult - Math.floor(priceMult)) * 10);
+
     if (thirdDecimal >= 5) {
         unitPrice = Math.ceil(priceMult) / 100;
     } else {

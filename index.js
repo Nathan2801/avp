@@ -59,7 +59,7 @@ productForm.addEventListener("submit", (ev) => {
 
 	const form = ev.target;
 
-	const desc = form["description"];
+	const desc = form["desc"];
 	if (!validField(desc, validateRequired)) return;
 
 	const code = form["code"];
@@ -82,13 +82,13 @@ productForm.addEventListener("submit", (ev) => {
 	const packed = form["packed"];
 
 	const product = Product({
-		description: desc.value,
-		code: 		 code.value,
-		price: 		 Number(price.value),
-		unit: 		 UnitFromString(form["unit"].value),
-		amount: 	 Number(amount.value),
-		repeat: 	 Number(repeat.value),
-		packed: 	 packed.checked,
+		desc:   desc.value,
+		code: 	code.value,
+		price: 	Number(price.value),
+		unit: 	UnitFromString(form["unit"].value),
+		amount: Number(amount.value),
+		repeat: Number(repeat.value),
+		packed: packed.checked,
 	});
 
 	addProductToTable(ID("products-table"), product);
@@ -136,13 +136,13 @@ const productTableIterator = (t) => {
 					continue;
 				}
 				yield Product({
-					description: row.cells[0].firstChild.data,
-					code: 		 row.cells[1].firstChild.data,
-					price: 		 Number(row.cells[2].firstChild.data),
-					unit: 	 	 UnitFromString(row.cells[3].firstChild.data),
-					amount: 	 Number(row.cells[4].firstChild.data),
-					repeat: 	 Number(row.cells[5].firstChild.data),
-					packed:      row.cells[6].firstChild.data === "true",
+					desc:   row.cells[0].firstChild.data,
+					code: 	row.cells[1].firstChild.data,
+					price: 	Number(row.cells[2].firstChild.data),
+					unit: 	UnitFromString(row.cells[3].firstChild.data),
+					amount: Number(row.cells[4].firstChild.data),
+					repeat: Number(row.cells[5].firstChild.data),
+					packed: row.cells[6].firstChild.data === "true",
 				});
 			}
 		}
@@ -166,7 +166,7 @@ for (const template of Object.values(allTemplates)) {
 
 const createPlateElement = (product) => {
 	return useTemplate(templateSelect.value, {
-		desc:      product.description,
+		desc:      product.desc,
 		currency:  "R$",
 		price:     product.price.toFixed(2).replace(".", ","),
 		unit:      product.packed ? UN.toString() : product.unit.toString(),
@@ -252,7 +252,7 @@ const loadFormFromLine = (form, line) => {
 
 	form["code"].value = code;
 	form["price"].value = price;
-	form["description"].value = desc;
+	form["desc"].value = desc;
 
 	form["repeat"].value = "1";
 	if (rest[0]?.toUpperCase().startsWith("SOMENTE LOJA")) {
@@ -328,7 +328,7 @@ if (urlParams.get("debug") === "true") {
 		}
 
 		addProductToTable(ID("products-table"), Product({
-			description: desc,
+			desc: desc,
 			code: "1231231231231",
 			price: Math.random() * 100,
 			unit: [UN, KG, LT][Math.floor(Math.random() * 3)],
