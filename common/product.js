@@ -70,22 +70,4 @@ export const productUnitPrice = (product) => {
     return unitPrice;
 }
 
-export const productUnitPriceDescription = (product) => {
-    let desc = "";
-    if (product.packed) {
-        desc = "NESSA EMBALAGEM ";
-    }
-    switch (product.unit.iota) {
-        case UN.iota:
-            return `${desc}A UN SAI`;
-        case KG.iota:
-            return `${desc}O KG SAI`;
-        case LT.iota:
-            return `${desc}O LT SAI`;
-        default:
-            console.error(`invalid unit value: ${product.unit}`);
-            return;
-    }
-}
-
 export default {};

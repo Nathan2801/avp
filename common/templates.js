@@ -1,3 +1,5 @@
+import { UN } from "./product.js";
+
 const Template = (props) => ({
 	name:  		  props?.name ?? "",
 	code: 		  props?.code ?? "",
@@ -19,10 +21,26 @@ export const createA4Page = () => {
 	return div;
 }
 
+const description = (props) => {
+	const ss = [];
+
+	if (props.packed) {
+		ss.push("NESTA EMBALAGEM");
+	}
+
+	ss.push(props.unit === "UN" ? "A" : "O");
+	ss.push(props.unit.toString());
+
+	ss.push("SAI");
+	ss.push(props.currency);
+
+	ss.push(props.price);
+	return ss.join(" ");
+}
+
 export const defaultTemplate = Template({
 	name: "Placa branca",
-	code: `<div
-		style="
+	code: (props) => `<div style="
 		width: 50%;
 		height: 20%;
 		display: flex;
@@ -37,26 +55,27 @@ export const defaultTemplate = Template({
 
 		border: 1px solid black;
 		padding: 1mm;
-		">
+	">
 		<div style="max-width: 95%; height: 4em;">
-			<span>%desc%</span>
+			<span>${props.desc}</span>
 		</div>
 		<div style="flex: 1;">
-			<span style="font-size: 1.5em;">%currency%</span>
-			<span style="font-size: 5em; margin: 0 12px;">%price%</span>
-			<span style="font-size: 1.5em;">%unit%</span>
+			<span style="font-size: 1.5em;">${props.currency}</span>
+			<span style="font-size: 5em; margin: 0 12px;">${props.price}</span>
+			<span style="font-size: 1.5em;">${props.packed ? "UN" : props.unit}</span>
 		</div>
 		<div>
-			<span>%unitDesc% R$%unitPrice%</span>
+			<span>${description(props)}</span>
 			<br>
-			<span>cod. %code%</span>
+			<span>cod. ${props.code}</span>
 		</div>
 	</div>`,
 })
+				
 
 export const yellowTemplate = Template({
 	name: "Placa amarela",
-	code: `<div style="
+	code: (props) => `<div style="
 		width: 50%;
 		height: 25%;
 		display: flex;
@@ -79,17 +98,17 @@ export const yellowTemplate = Template({
 			margin-bottom: 0.5em;
 		">OFERTA</span>
 		<div style="max-width: 95%; height: 3rem;">
-			<span>%desc%</span>
+			<span>${props.desc}</span>
 		</div>
 		<div style="flex: 1;">
-			<span style="font-size: 1.5em;">%currency%</span>
-			<span style="font-size: 5em; margin: 0 12px;">%price%</span>
-			<span style="font-size: 1.5em;">%unit%</span>
+			<span style="font-size: 1.5em;">${props.currency}</span>
+			<span style="font-size: 5em; margin: 0 12px;">${props.price}</span>
+			<span style="font-size: 1.5em;">${props.packed ? "UN" : props.unit}</span>
 		</div>
 		<div>
-			<span>%unitDesc% R$%unitPrice%</span>
+			<span>${description(props)}</span>
 			<br>
-			<span>cod. %code%</span>
+			<span>cod. ${props.code}</span>
 		</div>
 	</div>`,
 	platePerPage: 8,
@@ -171,7 +190,7 @@ export const grandYellowTemplate = Template({
 			unitPrice.style.background = "#00ffff22";
 		}
 
-		unitPrice.innerText = `${props.unitDesc} ${props.currency}${props.unitPrice}`;
+		unitPrice.innerText = description(props);
 		unitPrice.style.fontSize = "1.25rem";
 		unitPrice.style.margin = "2rem 0rem 1rem 0rem";
 
@@ -192,20 +211,13 @@ export const useTemplate = (name, props) => {
 		console.error("unknown template");
 		return;
 	}
-	if (typeof(template.code) === "string") {
-		let templateString = template.code;
-		for (const [prop, value] of Object.entries(props)) {
-			templateString = templateString.replaceAll(`%${prop}%`, value);
-		}
+	const result = template.code(props);
+	if (typeof(result) === "string") {
 		const tmp = document.createElement("div");
-		tmp.innerHTML = templateString;
+		tmp.innerHTML = result;
 		return tmp.firstChild;
-	} else if (typeof(template.code) === "function") {
-		return template.code(props);
-	} else {
-		console.error("Unable to use template");
-		return null;
 	}
+	return result;
 }
 
 export default {};

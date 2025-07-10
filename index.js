@@ -11,7 +11,6 @@ import {
 	UN, KG, LT,
 	UnitFromString,
 	productUnitPrice,
-	productUnitPriceDescription,
 } from "./common/product.js";
 
 import {
@@ -169,10 +168,10 @@ const createPlateElement = (product) => {
 		desc:      product.desc,
 		currency:  "R$",
 		price:     product.price.toFixed(2).replace(".", ","),
-		unit:      product.packed ? UN.toString() : product.unit.toString(),
+		unit:      product.unit.toString(),
 		unitPrice: productUnitPrice(product).toFixed(2).replace(".", ","),
 		code: 	   product.code,
-		unitDesc:  productUnitPriceDescription(product),
+		packed:    product.packed,
 	});
 }
 
