@@ -37,10 +37,6 @@ export const Product = (args) => {
 	};
 }
 
-const normalizePrice = (price) => {
-    return price.replace(",", ".");
-}
-
 const productGrams = (product) => {
 	if (product.unit.iota != KG.iota) {
 		console.error("product unit is not KG");
