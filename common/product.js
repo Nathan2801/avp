@@ -37,21 +37,9 @@ export const Product = (args) => {
 	};
 }
 
-const productGrams = (product) => {
-	if (product.unit.iota != KG.iota) {
-		console.error("product unit is not KG");
-		return 0;
-	}
-	return product.amount * 1000;
-}
+const productGrams = (product) => product.amount * 1000
 
-const productMillilitre = (product) => {
-	if (product.unit.iota !== LT.iota) {
-		console.error("product unit is not LT");
-		return 0;
-	}
-	return product.amount * 1000;
-}
+const productMillilitre = (product) => product.amount * 1000
 
 export const productUnitPrice = (product) => {
     let unitPrice = 0;
