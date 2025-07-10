@@ -1,5 +1,6 @@
 <html>
 	<head>
+		<meta charset="UTF-8">
 	</head>
 	<style>
 		@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap');
@@ -7,17 +8,23 @@
 		* {
 			margin: 0px;
 			padding: 0px;
-			box-sizing: border-box;
 			font-family: "Noto Sans", sans-serif;
 		} 
 	</style>
 	<body>
-		<script src="common/product.js"></script>
-		<script src="common/templates.js"></script>
-		<script>
+		<script type="module">
+			import {
+				Product,
+				UN, KG, LT,
+				productUnitPrice,
+				productUnitPriceDescription,
+			} from "./common/product.js";
+
+			import { createA4Page, useTemplate } from "./common/templates.js";
+
 			// FIXME: duplicate
 			const createPlateElement = (product) => {
-				const element = useTemplate("Placa branca", {
+				const element = useTemplate("Placa amarela grande", {
 					desc:      product.description,
 					currency:  "R$",
 					price:     product.price.toFixed(2).replace(".", ","),
@@ -25,6 +32,7 @@
 					unitPrice: productUnitPrice(product).toFixed(2).replace(".", ","),
 					code: 	   product.code,
 					unitDesc:  productUnitPriceDescription(product),
+					debug:	   false,
 				});
 
 				if (element === null) {
@@ -32,9 +40,7 @@
 					return;
 				}
 
-				const parent = document.createElement("div");
-				parent.innerHTML = element;
-				return parent.firstChild;
+				return element;
 			}
 
 			const page = createA4Page();

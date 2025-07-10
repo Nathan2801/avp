@@ -2,8 +2,6 @@ import {
 	useTemplate,
 	createA4Page,
 	allTemplates,
-	defaultTemplate,
-	yellowTemplate,
 } from "./common/templates.js";
 
 import Parser from "./common/parser.js";
@@ -162,11 +160,12 @@ const createTemplateOption = (template) => {
 	templateSelect.appendChild(option);
 }
 
-createTemplateOption(defaultTemplate);
-createTemplateOption(yellowTemplate);
+for (const template of Object.values(allTemplates)) {
+	createTemplateOption(template);
+}
 
 const createPlateElement = (product) => {
-	const element = useTemplate(templateSelect.value, {
+	return useTemplate(templateSelect.value, {
 		desc:      product.description,
 		currency:  "R$",
 		price:     product.price.toFixed(2).replace(".", ","),
@@ -175,15 +174,6 @@ const createPlateElement = (product) => {
 		code: 	   product.code,
 		unitDesc:  productUnitPriceDescription(product),
 	});
-
-	if (element === null) {
-		console.log("invalid template value");
-		return;
-	}
-
-	const parent = document.createElement("div");
-	parent.innerHTML = element;
-	return parent.firstChild;
 }
 
 const createPrintWindow = () => {
@@ -233,6 +223,7 @@ const printPlates = () => {
 		}
 
 		const plate = createPlateElement(product);
+		console.assert(plate !== null);
 		currPage.appendChild(plate);
 
 		i++;
@@ -278,7 +269,6 @@ const loadFormFromLine = (form, line) => {
 		parser = Parser.done(parser);
 
 		parser = Parser.parseWord(parser);
-		console.log(parser);
 		if (parser.parsed === undefined) {
 			console.error("unable to parse word");
 			continue;

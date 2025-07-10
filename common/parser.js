@@ -30,8 +30,6 @@ Parser.isAlpha = (parser) => (
 	)
 )
 
-Parser.create = (f) => (m) => (parser) => f(parser) ? m(parser) : parser
-
 Parser.consume = (parser) => Parser(
 	parser.text.slice(1),
 	parser.parsed === undefined
@@ -39,15 +37,13 @@ Parser.consume = (parser) => Parser(
 		: parser.parsed + parser.text[0]
 )
 
-const chain = (f) => (g) => (x) => g(f(x))
+Parser.parseWord = (parser) => Parser.isAlpha(parser)
+	? Parser.parseWord(Parser.consume(parser))
+	: parser
 
-Parser.parseWord = Parser.create
-	(Parser.isAlpha)
-	(chain (Parser.consume) (Parser.parseWord))
-
-Parser.parseNumber = Parser.create
-	(Parser.isNumber)
-	(chain (Parser.consume) (Parser.parseNumber))
+Parser.parseNumber = (parser) => Parser.isNumber(parser)
+	? Parser.parseNumber(Parser.consume(parser))
+	: parser
 
 Parser.done = (parser) => Parser(parser.text)
 
