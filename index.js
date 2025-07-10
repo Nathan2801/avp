@@ -24,7 +24,6 @@ import {
 const ID = (id) => document.getElementById(id);
 
 ID("print-plates").addEventListener("click", (ev) => printPlates());
-ID("export-table").addEventListener("click", (ev) => window.alert("Não implementado"));
 
 ID("load-lines").addEventListener(
 	"click",
