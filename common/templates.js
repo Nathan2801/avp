@@ -1,6 +1,6 @@
 const Template = (props) => ({
-	name: props?.name ?? "",
-	code: props?.code ?? "",
+	name:  		  props?.name ?? "",
+	code: 		  props?.code ?? "",
 	platePerPage: props?.platePerPage ?? 10,
 })
 
