@@ -13,24 +13,16 @@ export const UN = Unit("UN");
 export const KG = Unit("KG");
 export const LT = Unit("LT");
 
-export const UnitFromString = (x) => {
-    switch (x) {
-        case "UN":
-        case "un":
-            return UN;
-        case "KG":
-        case "kg":
-		case  "G":
-		case  "g":
-            return KG;
-        case "LT":
-        case "lt":
-        case "ML":
-        case "ml":
-            return LT;
-		default:
-			return null;
-    }
+const UnitStringMap = {
+	["UN"]: UN, ["un"]: UN,
+	["KG"]: KG, ["kg"]: KG,
+	[ "G"]: KG, [ "g"]: KG,
+	["LT"]: LT, ["lt"]: LT,
+	["ML"]: LT, ["ml"]: LT,
+}
+
+export const UnitFromString = (s) => {
+	return UnitStringMap[s];
 }
 
 export const Product = (args) => {
