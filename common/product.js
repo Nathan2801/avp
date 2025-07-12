@@ -3,7 +3,7 @@ const Unit = (repr) => {
         iota: Unit.iota++,
         toString() {
             return repr;
-        }
+        },
     };
 }
 
@@ -19,6 +19,7 @@ const UnitStringMap = {
 	[ "G"]: KG, [ "g"]: KG,
 	["LT"]: LT, ["lt"]: LT,
 	["ML"]: LT, ["ml"]: LT,
+	[" L"]: LT, [ "l"]: LT,
 }
 
 export const UnitFromString = (s) => {

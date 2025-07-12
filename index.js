@@ -246,22 +246,32 @@ const loadFormFromLine = (form, line) => {
 	}
 
 	const values = line.split("-").map((x) => x.trim());
-	if (values.length < 3) {
-		return `line should have at least three sections:\n"${line}"`;
+	if (values.length < 2) {
+		return `line should have at least 2 sections:\n"${line}"`;
 	}
 
-	const [code, desc, price, ...rest] = values;
+	let rest;
 
-	form["code"].value = code;
-	form["price"].value = price;
-	form["desc"].value = desc;
+	let t = Tokenizer(values[0]);
+	t = Tokenizer.number(t);
+	if (Tokenizer.ok(t)) {
+		form["code"].value = values[0];
+		form["desc"].value = values[1];
+		form["price"].value = values[2];
+		rest = values.slice(3);
+	} else {
+		form["desc"].value = values[0];
+		form["price"].value = values[1];
+		rest = values.slice(2);
+	}
+	t = undefined;
 
-	form["repeat"].value = "1";
+	form["repeat"].value = "2";
 	if (rest[0]?.toUpperCase().startsWith("SOMENTE LOJA")) {
-		form["repeat"].value = 2;
+		form["repeat"].value = "1";
 	}
 
-	for (const word of desc.split(" ")) {
+	for (const word of form["desc"].value.split(" ")) {
 		let t = Tokenizer(word);
 
 		t = Tokenizer.number(t);
@@ -291,14 +301,15 @@ const loadFormFromLine = (form, line) => {
 			case "UN":
 			case "KG":
 			case "LT":
+			case  "L":
 				amount = n;
 				break;
-			case "G":
+			case  "G":
 			case "ML":
 				amount = n / 1000;
 				break;
 			default:
-				return `unknown unit: ${unit}`;
+				return `unknown unit abbreviation: ${unitAbbr}`;
 		}
 
 		form["unit"].value = unit.toString().toLowerCase();
@@ -313,8 +324,9 @@ const urlParams = new URLSearchParams(window.location.search);
 
 if (urlParams.get("test") === "true") {
 	ID("text-area-for-load").value += "123 - Foo 1kg - 1,99\n";
-	ID("text-area-for-load").value += "321 - Foo 200g - 10.99\n";
-	ID("text-area-for-load").value += "6969 - Foo 1,5KG - 11,99\n";
+	ID("text-area-for-load").value += "321 - Bar 200g - 10.99\n";
+	ID("text-area-for-load").value += "6969 - Baz 1,5KG - 11,99\n";
+	ID("text-area-for-load").value += "Foo 10l - 11,99\n";
 	loadFormFromTextArea(
 		ID("product-form"),
 		ID("text-area-for-load")
