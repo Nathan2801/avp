@@ -34,7 +34,7 @@ const description = (props) => {
 	ss.push("SAI");
 	ss.push(props.currency);
 
-	ss.push(props.price);
+	ss.push(props.unitPrice);
 	return ss.join(" ");
 }
 
@@ -56,7 +56,7 @@ export const defaultTemplate = Template({
 		border: 1px solid black;
 		padding: 1mm;
 	">
-		<div style="max-width: 95%; height: 4em;">
+		<div style="max-width: 95%; height: 4em; font-size: 1.1em">
 			<span>${props.desc}</span>
 		</div>
 		<div style="flex: 1;">
@@ -89,15 +89,16 @@ export const yellowTemplate = Template({
 		justify-content: space-around;
 
 		border: 1px solid black;
-		background: yellow;
 		padding: 1mm;
+
+		background: yellow;
 	">
 		<span style="
 		 	font-size: 2em;
 			text-decoration: underline;
 			margin-bottom: 0.5em;
 		">OFERTA</span>
-		<div style="max-width: 95%; height: 3rem;">
+		<div style="max-width: 95%; height: 4rem; font-size: 1.1em">
 			<span>${props.desc}</span>
 		</div>
 		<div style="flex: 1;">

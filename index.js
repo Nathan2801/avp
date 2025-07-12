@@ -333,6 +333,7 @@ if (urlParams.get("test") === "true") {
 	ID("text-area-for-load").value += "6969 - Baz 1,5KG - 11,99\n";
 	ID("text-area-for-load").value += "Lambda 10l - 11,99\n";
 	ID("text-area-for-load").value += "420 - Foster KG - 69,96\n";
+	ID("text-area-for-load").value += "1 - A really long description for no porpuse other than checking how it will looks in templates 0,100kg - 420,124\n";
 	loadFormFromTextArea(
 		ID("product-form"),
 		ID("text-area-for-load")
