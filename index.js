@@ -104,6 +104,8 @@ const addProductToTable = (table, product) => {
 			v = value.toFixed(2);
 		} else if (key === "amount") {
 			v = value.toFixed(3);
+		} else if (key === "packed") {
+			v = value ? "sim" : "não";
 		}
 		const text = document.createTextNode(v);
 		const cell = row.insertCell(-1);
@@ -140,7 +142,7 @@ const productTableIterator = (t) => {
 					unit: 	UnitFromString(row.cells[3].firstChild.data),
 					amount: Number(row.cells[4].firstChild.data),
 					repeat: Number(row.cells[5].firstChild.data),
-					packed: row.cells[6].firstChild.data === "true",
+					packed: row.cells[6].firstChild.data === "sim",
 				});
 			}
 		}
@@ -271,14 +273,20 @@ const loadFormFromLine = (form, line) => {
 		form["repeat"].value = "1";
 	}
 
+	form["packed"].checked = true;
+
 	for (const word of form["desc"].value.split(" ")) {
+		if (word.toUpperCase() === "KG") {
+			form["packed"].checked = false;
+			form["amount"].value = "1";
+			form["unit"].value = "KG";
+			break;
+		}
+
 		let t = Tokenizer(word);
 
 		t = Tokenizer.number(t);
-		if (!Tokenizer.ok(t)) {
-			continue;
-		}
-
+		if (!Tokenizer.ok(t)) continue;
 		const n = Number(t.token.replace(",", "."));
 		t = Tokenizer.done(t);
 
@@ -290,11 +298,8 @@ const loadFormFromLine = (form, line) => {
 			console.error(err);
 			continue;
 		}
-
 		const unitAbbr = t.token;
 		t = Tokenizer.done(t);
-
-		const unit = UnitFromString(unitAbbr);
 
 		let amount = 0;
 		switch (unitAbbr.toUpperCase()) {
@@ -312,11 +317,11 @@ const loadFormFromLine = (form, line) => {
 				return `unknown unit abbreviation: ${unitAbbr}`;
 		}
 
-		form["unit"].value = unit.toString().toLowerCase();
+		form["unit"].value = UnitFromString(unitAbbr)
+			.toString()
+			.toUpperCase();
 		form["amount"].value = amount;
 	}
-
-	form["packed"].checked = true;
 	return "";
 }
 
@@ -326,7 +331,8 @@ if (urlParams.get("test") === "true") {
 	ID("text-area-for-load").value += "123 - Foo 1kg - 1,99\n";
 	ID("text-area-for-load").value += "321 - Bar 200g - 10.99\n";
 	ID("text-area-for-load").value += "6969 - Baz 1,5KG - 11,99\n";
-	ID("text-area-for-load").value += "Foo 10l - 11,99\n";
+	ID("text-area-for-load").value += "Lambda 10l - 11,99\n";
+	ID("text-area-for-load").value += "420 - Foster KG - 69,96\n";
 	loadFormFromTextArea(
 		ID("product-form"),
 		ID("text-area-for-load")
