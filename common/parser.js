@@ -7,42 +7,43 @@ const Parser = (text, parsed) => ({
 	parsed: parsed,
 })
 
-Parser.ord = (char) => char ? char.charCodeAt(0) : -1
+const ord = (char) => char ? char.charCodeAt(0) : -1
 
-Parser.isDigit = (parser) => (
-	Parser.ord(parser.text[0]) >= Parser.ord("0")
-	&& Parser.ord(parser.text[0]) <= Parser.ord("9")
+const isDigit = (parser) => (
+	ord(parser.text[0]) >= ord("0")
+	&& ord(parser.text[0]) <= ord("9")
 )
 
-Parser.isNumber = (parser) => (
-	parser.text[0] == "."
-	|| Parser.isDigit(parser)
+const isNumber = (parser) => (
+	parser.text[0] === "."
+	|| parser.text[0] === ","
+	|| isDigit(parser)
 )
 
-Parser.isAlpha = (parser) => (
+const isAlpha = (parser) => (
 	(
-		Parser.ord(parser.text[0]) >= Parser.ord("a")
-		&& Parser.ord(parser.text[0]) <= Parser.ord("z")
+		ord(parser.text[0]) >= ord("a")
+		&& ord(parser.text[0]) <= ord("z")
 	) ||
 	(
-		Parser.ord(parser.text[0]) >= Parser.ord("A")
-		&& Parser.ord(parser.text[0]) <= Parser.ord("Z")
+		ord(parser.text[0]) >= ord("A")
+		&& ord(parser.text[0]) <= ord("Z")
 	)
 )
 
-Parser.consume = (parser) => Parser(
+const consume = (parser) => Parser(
 	parser.text.slice(1),
 	parser.parsed === undefined
 		? parser.text[0]
 		: parser.parsed + parser.text[0]
 )
 
-Parser.parseWord = (parser) => Parser.isAlpha(parser)
-	? Parser.parseWord(Parser.consume(parser))
+Parser.parseWord = (parser) => isAlpha(parser)
+	? Parser.parseWord (consume(parser))
 	: parser
 
-Parser.parseNumber = (parser) => Parser.isNumber(parser)
-	? Parser.parseNumber(Parser.consume(parser))
+Parser.parseNumber = (parser) => isNumber(parser)
+	? Parser.parseNumber (consume(parser))
 	: parser
 
 Parser.done = (parser) => Parser(parser.text)

@@ -241,6 +241,10 @@ const loadFormFromTextArea = (form, textArea) => {
 }
 
 const loadFormFromLine = (form, line) => {
+	if (line === "") {
+		return "";
+	}
+
 	const values = line.split("-").map((x) => x.trim());
 	if (values.length < 3) {
 		return `line should have at least three sections:\n"${line}"`;
@@ -261,14 +265,19 @@ const loadFormFromLine = (form, line) => {
 		let parser = Parser(word);
 
 		parser = Parser.parseNumber(parser);
-		if (parser.parsed === undefined) continue;
+		if (parser.parsed === undefined) {
+			continue;
+		}
 
-		const n = Number(parser.parsed);
+		const n = Number(parser.parsed.replace(",", "."));
 		parser = Parser.done(parser);
 
 		parser = Parser.parseWord(parser);
 		if (parser.parsed === undefined) {
-			console.error("unable to parse word");
+			let err = "unable to parse line:\n";
+			err += "  " + line + "\n";
+			err += "  error at '" + parser.text + "'"; 
+			console.error(err);
 			continue;
 		}
 
@@ -302,37 +311,12 @@ const loadFormFromLine = (form, line) => {
 
 const urlParams = new URLSearchParams(window.location.search);
 
-if (urlParams.get("debug") === "true") {
-	let n = Number(urlParams.get("amount")) || 12;
-	for (let i = 0; i < n; i++) {
-		let amount = 1;
-
-		const unit = [UN, KG, LT][Math.floor(Math.random() * 3)];
-		if (unit.iota === UN.iota) {
-			amount = Math.ceil(Math.random() * 5);
-		} else {
-			amount = Math.random() * 2;
-		}
-
-		let desc = "";
-		const descLen = Math.floor(Math.random() * 50) + 20;
-		for (let i = 0; i < descLen; i++) {
-			const space = Math.floor(Math.random() * 4);
-			if (space === 0) {
-				desc += " ";
-			} else {
-				desc += "abcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random() * 26)];
-			}
-		}
-
-		addProductToTable(ID("products-table"), Product({
-			desc: desc,
-			code: "1231231231231",
-			price: Math.random() * 100,
-			unit: [UN, KG, LT][Math.floor(Math.random() * 3)],
-			amount: amount,
-			repeat: 1,
-			packed: Math.round(Math.random()) === 1,
-		}));
-	}
+if (urlParams.get("test") === "true") {
+	ID("text-area-for-load").value += "123 - Foo 1kg - 1,99\n";
+	ID("text-area-for-load").value += "321 - Foo 200g - 10.99\n";
+	ID("text-area-for-load").value += "6969 - Foo 1,5KG - 11,99\n";
+	loadFormFromTextArea(
+		ID("product-form"),
+		ID("text-area-for-load")
+	);
 }
