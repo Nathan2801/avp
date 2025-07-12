@@ -4,7 +4,7 @@ import {
 	allTemplates,
 } from "./common/templates.js";
 
-import Parser from "./common/parser.js";
+import Tokenizer from "./common/tokenizer.js";
 
 import {
 	Product,
@@ -262,32 +262,32 @@ const loadFormFromLine = (form, line) => {
 	}
 
 	for (const word of desc.split(" ")) {
-		let parser = Parser(word);
+		let t = Tokenizer(word);
 
-		parser = Parser.parseNumber(parser);
-		if (parser.parsed === undefined) {
+		t = Tokenizer.number(t);
+		if (!Tokenizer.ok(t)) {
 			continue;
 		}
 
-		const n = Number(parser.parsed.replace(",", "."));
-		parser = Parser.done(parser);
+		const n = Number(t.token.replace(",", "."));
+		t = Tokenizer.done(t);
 
-		parser = Parser.parseWord(parser);
-		if (parser.parsed === undefined) {
+		t = Tokenizer.word(t);
+		if (!Tokenizer.ok(t)) {
 			let err = "unable to parse line:\n";
 			err += "  " + line + "\n";
-			err += "  error at '" + parser.text + "'"; 
+			err += "  error at '" + t.text + "'"; 
 			console.error(err);
 			continue;
 		}
 
-		const uword = parser.parsed;
-		parser = Parser.done(parser);
+		const unitAbbr = t.token;
+		t = Tokenizer.done(t);
 
-		const unit = UnitFromString(uword);
+		const unit = UnitFromString(unitAbbr);
 
 		let amount = 0;
-		switch (uword.toUpperCase()) {
+		switch (unitAbbr.toUpperCase()) {
 			case "UN":
 			case "KG":
 			case "LT":
