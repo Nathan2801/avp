@@ -105,7 +105,7 @@ const addProductToTable = (table, product) => {
 		} else if (key === "amount") {
 			v = value.toFixed(3);
 		} else if (key === "packed") {
-			v = value ? "sim" : "não";
+			v = value ? "UN" : product.unit.toString().toUpperCase();
 		}
 		const text = document.createTextNode(v);
 		const cell = row.insertCell(-1);
@@ -142,7 +142,7 @@ const productTableIterator = (t) => {
 					unit: 	UnitFromString(row.cells[3].firstChild.data),
 					amount: Number(row.cells[4].firstChild.data),
 					repeat: Number(row.cells[5].firstChild.data),
-					packed: row.cells[6].firstChild.data === "sim",
+					packed: row.cells[6].firstChild.data === "UN",
 				});
 			}
 		}
@@ -320,6 +320,7 @@ const loadFormFromLine = (form, line) => {
 		form["unit"].value = UnitFromString(unitAbbr)
 			.toString()
 			.toUpperCase();
+
 		form["amount"].value = amount;
 	}
 	return "";
