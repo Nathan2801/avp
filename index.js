@@ -164,7 +164,7 @@ for (const template of Object.values(allTemplates)) {
 	createTemplateOption(template);
 }
 
-const createPlateElement = (product) => {
+const createPlateElement = (product, parent = null) => {
 	return useTemplate(templateSelect.value, {
 		desc:      product.desc,
 		currency:  "R$",
@@ -173,6 +173,7 @@ const createPlateElement = (product) => {
 		unitPrice: productUnitPrice(product).toFixed(2).replace(".", ","),
 		code: 	   product.code,
 		packed:    product.packed,
+		parent:    parent,
 	});
 }
 
@@ -222,9 +223,12 @@ const printPlates = () => {
 			printWindow.document.body.appendChild(currPage);
 		}
 
-		const plate = createPlateElement(product);
-		console.assert(plate !== null);
-		currPage.appendChild(plate);
+		const plate = createPlateElement(product, currPage);
+		if (plate === null) {
+			console.error("invalid plate element");
+		} else if (plate !== true) {
+			currPage.appendChild(plate);
+		}
 
 		i++;
 	}

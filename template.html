@@ -17,22 +17,21 @@
 				Product,
 				UN, KG, LT,
 				productUnitPrice,
-				productUnitPriceDescription,
 			} from "./common/product.js";
 
 			import { createA4Page, useTemplate } from "./common/templates.js";
 
 			// FIXME: duplicate
-			const createPlateElement = (product) => {
+			const createPlateElement = (parent, product) => {
 				const element = useTemplate("Placa amarela grande", {
-					desc:      product.description,
+					desc:      product.desc,
 					currency:  "R$",
 					price:     product.price.toFixed(2).replace(".", ","),
 					unit:      product.packed ? UN.toString() : product.unit.toString(),
 					unitPrice: productUnitPrice(product).toFixed(2).replace(".", ","),
 					code: 	   product.code,
-					unitDesc:  productUnitPriceDescription(product),
-					debug:	   false,
+					debug:	   true,
+					parent:    parent,
 				});
 
 				if (element === null) {
@@ -45,16 +44,17 @@
 
 			const page = createA4Page();
 			document.body.appendChild(page);
-			const plate = createPlateElement(Product({
-				description: "Suco [marca] 500ml de laraja/maracuja com pedaços de almondegas empanadas não fritas",
+			const plate = createPlateElement(page, Product({
+				//desc: "Suco Avz 500ml de laraja/maracuja com pedaços de almondegas empanadas não fritas",
+				//desc: "Arroz Avz Tp1 5kg",
+				desc: "Feijao Preto Avz Tp1 5kg com Osso",
 				code: "1234567891011",
-				price: 8.69,
+				price: 18.69,
 				unit: LT,
 				amount: 1,
 				repeat: 1,
 				packed: true,
 			}));
-			page.appendChild(plate);
 		</script>
 	</body>
 </html>
