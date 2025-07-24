@@ -4,7 +4,7 @@ import {
 	allTemplates,
 } from "./common/templates.js";
 
-import Tokenizer from "./common/tokenizer.js";
+import Tokenizer, {TKind} from "./common/tokenizer.js";
 
 import {
 	Product,
@@ -247,86 +247,89 @@ const loadFormFromTextArea = (form, textArea) => {
 }
 
 const loadFormFromLine = (form, line) => {
-	if (line === "") {
-		return "";
+	const t = Tokenizer(line);
+
+	const tokens = Tokenizer.tokens(t);
+	if (tokens.length === 0) {
+		return "got no tokens";
 	}
 
-	const values = line.split("-").map((x) => x.trim());
-	if (values.length < 2) {
-		return `line should have at least 2 sections:\n"${line}"`;
+	const codeToken = tokens.shift(1); 
+	if (codeToken.kind === TKind.number) {
+		form["code"].value = Number(codeToken.text);
+
+		const sepToken = tokens.shift(1);
+		if (sepToken.text !== "-") {
+			return `expected '-' but got '${sepToken.text}'`;
+		}
 	}
 
-	let rest;
-
-	let t = Tokenizer(values[0]);
-	t = Tokenizer.number(t);
-	if (Tokenizer.ok(t)) {
-		form["code"].value = values[0];
-		form["desc"].value = values[1];
-		form["price"].value = values[2];
-		rest = values.slice(3);
-	} else {
-		form["desc"].value = values[0];
-		form["price"].value = values[1];
-		rest = values.slice(2);
-	}
-	t = undefined;
-
-	form["repeat"].value = "2";
-	if (rest[0]?.toUpperCase().startsWith("SOMENTE LOJA")) {
-		form["repeat"].value = "1";
-	}
-
-	form["packed"].checked = true;
-
-	for (const word of form["desc"].value.split(" ")) {
-		if (word.toUpperCase() === "KG") {
-			form["packed"].checked = false;
-			form["amount"].value = "1";
-			form["unit"].value = "KG";
+	let words = [];
+	while (true) {
+		const token = tokens.shift(1);
+		if (token === undefined) {
+			return "run out of token";
+		}
+		if (token.text === "-") {
 			break;
 		}
+		words.push(token.text);
+	}
 
-		let t = Tokenizer(word);
+	const priceToken = tokens.shift(1);
+	if (priceToken.kind !== TKind.number) {
+		return `expected price but got '${priceToken.text}'`;
+	}
 
-		t = Tokenizer.number(t);
-		if (!Tokenizer.ok(t)) continue;
-		const n = Number(t.token.replace(",", "."));
-		t = Tokenizer.done(t);
+	let repeat = 2;
+	if (tokens.length > 0) {
+		token = tokens.shift(1);
+		if (token.text === "SOMENTE") {
+			repeat = 1;
+		}
+	}
 
-		t = Tokenizer.word(t);
-		if (!Tokenizer.ok(t)) {
-			let err = "unable to parse line:\n";
-			err += "  " + line + "\n";
-			err += "  error at '" + t.text + "'"; 
-			console.error(err);
+	let unit = "";
+	let amount = 0;
+	let checked = true;
+	if (words.map(x => x.toUpperCase()).includes("KG")) {
+		amount  = 1;
+		unit    = "KG";
+		checked = false;
+	}
+
+	for (let i = 0; i < words.length - 1; i++) {
+		const n = words[i].replace(",", ".");
+		const u = words[i + 1];
+
+		if (Number.isNaN(Number(n))) {
 			continue;
 		}
-		const unitAbbr = t.token;
-		t = Tokenizer.done(t);
 
-		let amount = 0;
-		switch (unitAbbr.toUpperCase()) {
+		switch (u.toUpperCase()) {
 			case "UN":
 			case "KG":
 			case "LT":
 			case  "L":
-				amount = n;
+				amount = Number(n);
+				unit   = UnitFromString(u).toString().toUpperCase();
 				break;
 			case  "G":
 			case "ML":
-				amount = n / 1000;
+				amount = Number(n) / 1000;
+				unit   = UnitFromString(u).toString().toUpperCase();
 				break;
-			default:
-				return `unknown unit abbreviation: ${unitAbbr}`;
 		}
-
-		form["unit"].value = UnitFromString(unitAbbr)
-			.toString()
-			.toUpperCase();
-
-		form["amount"].value = amount;
 	}
+
+	form["repeat"].value   = repeat;
+	form[  "desc"].value   = words.join(" ");
+	form[  "code"].value   = Number(codeToken.text);
+	form[ "price"].value   = Number(priceToken.text.replace(",", "."));
+	form["packed"].checked = checked;
+	form[  "unit"].value   = unit;
+	form["amount"].value   = amount;
+
 	return "";
 }
 
